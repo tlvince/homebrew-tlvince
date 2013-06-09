@@ -13,6 +13,7 @@ class Mutt < Formula
   option "with-pgp-verbose-mime-patch", "Apply PGP verbose mime patch"
   option "with-confirm-crypt-hook-patch", "Apply confirm crypt hook patch"
   option "with-confirm-attachment-patch", "Apply confirm attachment patch"
+  option "mua", "Build without mail fetching/sending support"
 
   depends_on 'tokyo-cabinet'
   depends_on 'slang' if build.include? 'with-slang'
@@ -51,18 +52,23 @@ class Mutt < Formula
     args = ["--disable-dependency-tracking",
             "--disable-warnings",
             "--prefix=#{prefix}",
-            "--with-ssl",
-            "--with-sasl",
-            "--with-gss",
-            "--enable-imap",
-            "--enable-smtp",
-            "--enable-pop",
             "--enable-hcache",
             "--with-tokyocabinet",
             # This is just a trick to keep 'make install' from trying to chgrp
             # the mutt_dotlock file (which we can't do if we're running as an
             # unpriviledged user)
             "--with-homespool=.mbox"]
+
+    if not build.include? 'mua'
+      etc = ["--with-ssl",
+             "--with-sasl",
+             "--with-gss",
+             "--enable-imap",
+             "--enable-smtp",
+             "--enable-pop"]
+      args = args + etc
+    end
+
     args << "--with-slang" if build.include? 'with-slang'
 
     if build.include? 'with-debug'
