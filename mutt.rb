@@ -30,7 +30,7 @@ class Mutt < Formula
       # http://www.woolridge.ca/mutt/confirm-crypt-hook.html
       ['with-confirm-crypt-hook-patch', 'http://www.woolridge.ca/mutt/patches/patch-1.5.6.dw.confirm-crypt-hook.1'],
       # http://bugs.debian.org/cgi-bin/bugreport.cgi?bug=182069
-      ['with-confirm-attachment-patch', 'http://bugs.debian.org/cgi-bin/bugreport.cgi?msg=5;filename=mutt-attach.diff;att=1;bug=182069'],
+      ['with-confirm-attachment-patch', 'https://gist.github.com/tlvince/5741641/raw/c926ca307dc97727c2bd88a84dcb0d7ac3bb4bf5/mutt-attach.patch'],
 
     ]
 
