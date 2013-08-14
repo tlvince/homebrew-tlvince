@@ -1,12 +1,18 @@
 require 'formula'
 
+class MuttHtmldocs < Formula
+  head 'http://dev.mutt.org/doc/manual.html', :using => :nounzip
+end
+
 class Mutt < Formula
   homepage 'http://www.mutt.org/'
   url 'ftp://ftp.mutt.org/mutt/devel/mutt-1.5.21.tar.gz'
   sha1 'a8475f2618ce5d5d33bff85c0affdf21ab1d76b9'
 
+  head 'http://dev.mutt.org/hg/mutt#HEAD', :using => :hg
+
   option "with-debug", "Build with debug option enabled"
-  option "with-sidebar-patch", "Apply sidebar (folder list) patch"
+  option "with-sidebar-patch", "Apply sidebar (folder list) patch" unless build.head?
   option "with-trash-patch", "Apply trash folder patch"
   option "with-slang", "Build against slang instead of ncurses"
   option "with-ignore-thread-patch", "Apply ignore-thread patch"
@@ -16,7 +22,11 @@ class Mutt < Formula
   option "mua", "Build without mail fetching/sending support"
 
   depends_on 'tokyo-cabinet'
-  depends_on 'slang' if build.include? 'with-slang'
+  depends_on 's-lang' => :optional
+  if build.head?
+    depends_on :autoconf
+    depends_on :automake
+  end
 
   def patches
     urls = [
@@ -34,7 +44,7 @@ class Mutt < Formula
 
     ]
 
-    if build.include? "with-ignore-thread-patch" and build.include? "with-sidebar-patch"
+    if build.with? "ignore-thread-patch" and build.with? "sidebar-patch"
       puts "\n"
       onoe "The ignore-thread-patch and sidebar-patch options are mutually exlusive. Please pick one"
       exit 1
@@ -58,6 +68,7 @@ class Mutt < Formula
             # the mutt_dotlock file (which we can't do if we're running as an
             # unpriviledged user)
             "--with-homespool=.mbox"]
+    args << "--with-slang" if build.with? 's-lang'
 
     if not build.include? 'mua'
       etc = ["--with-ssl",
@@ -77,7 +88,16 @@ class Mutt < Formula
       args << "--disable-debug"
     end
 
-    system "./configure", *args
-    system "make install"
+    if build.head?
+      system "./prepare", *args
+    else
+      system "./configure", *args
+    end
+    system "make"
+    system "make", "install"
+
+    if build.head?
+      MuttHtmldocs.new.brew { (share/'doc/mutt').install 'manual.html' }
+    end
   end
 end
